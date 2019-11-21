@@ -1,0 +1,77 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Gateways Template
+Outputs:
+  InternetGatewayId:
+    Description: Internet Gateway ID.
+    Value:
+      Ref: InternetGateway
+  NatGatewayOneId:
+    Description: NAT Gateway One
+    Value:
+      Ref: NatGatewayOne
+  NatGatewayTwoId:
+    Description: NAT Gateway Two
+    Value:
+      Ref: NatGatewayTwo
+Parameters:
+  Namespace:
+    Description: Project namespace for tags.
+    Type: String
+  SubnetPublicOneId:
+    Description: Subnet Public One ID.
+    Type: String
+  SubnetPublicTwoId:
+    Description: Subnet Public Two ID.
+    Type: String
+  VpcId:
+    Description: VPC ID to add subnets to.
+    Type: String
+Resources:
+  InternetGateway:
+    Properties:
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Sub: ${Namespace}-internet-gateway
+    Type: AWS::EC2::InternetGateway
+  InternetGatewayAttachment:
+    Properties:
+      InternetGatewayId:
+        Ref: InternetGateway
+      VpcId:
+        Ref: VpcId
+    Type: AWS::EC2::VPCGatewayAttachment
+  NatGatewayOne:
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - NatOneEip
+        - AllocationId
+      SubnetId:
+        Ref: SubnetPublicOneId
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Sub: ${Namespace}-nat-gateway-one
+    Type: AWS::EC2::NatGateway
+  NatGatewayTwo:
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - NatTwoEip
+        - AllocationId
+      SubnetId:
+        Ref: SubnetPublicTwoId
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Sub: ${Namespace}-nat-gateway-two
+    Type: AWS::EC2::NatGateway
+  NatOneEip:
+    Properties:
+      Domain: vpc
+    Type: AWS::EC2::EIP
+  NatTwoEip:
+    Properties:
+      Domain: vpc
+    Type: AWS::EC2::EIP

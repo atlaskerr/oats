@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: VPC Template
+Outputs:
+  VpcId:
+    Description: VPC ID.
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-VpcId
+    Value:
+      Ref: VPC
+Parameters:
+  CidrBlock:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    Description: Cidr block to use for the VPC.
+    Type: String
+  Environment:
+    Description: A unique name to associate with the VPC for tagging purposes.
+    Type: String
+Resources:
+  VPC:
+    Properties:
+      CidrBlock:
+        Ref: CidrBlock
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Sub: vpc-${Environment}
+    Type: AWS::EC2::VPC

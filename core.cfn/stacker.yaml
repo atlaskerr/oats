@@ -1,0 +1,52 @@
+environment: ${environment}
+namespace: ${namespace}
+region: ${region}
+stacker_bucket: ${stacker_bucket_name}
+stacks:
+- enabled: true
+  name: vpc-${environment}
+  template_path: ./vpc/template.yaml
+  variables:
+    CidrBlock: ${vpc_cidr}
+    Environment: ${namespace}-${environment}-${region}
+- enabled: true
+  name: subnets-${environment}
+  template_path: ./subnets/template.yaml
+  variables:
+    Namespace: ${namespace}-${environment}-${region}
+    SubnetPrivateOneCidr: ${subnet_private_one_cidr}
+    SubnetPrivateTwoCidr: ${subnet_private_two_cidr}
+    SubnetPublicOneCidr: ${subnet_public_one_cidr}
+    SubnetPublicTwoCidr: ${subnet_public_two_cidr}
+    VpcId: ${output vpc-${environment}::VpcId}
+- enabled: true
+  name: gateways-${environment}
+  template_path: ./gateways/template.yaml
+  variables:
+    Namespace: ${namespace}-${environment}-${region}
+    SubnetPublicOneId: ${output subnets-${environment}::SubnetPublicOneId}
+    SubnetPublicTwoId: ${output subnets-${environment}::SubnetPublicTwoId}
+    VpcId: ${output vpc-${environment}::VpcId}
+- enabled: true
+  name: routes-${environment}
+  template_path: ./routes/template.yaml
+  variables:
+    InternetGatewayId: ${output gateways-${environment}::InternetGatewayId}
+    Namespace: ${namespace}-${environment}-${region}
+    NatGatewayOneId: ${output gateways-${environment}::NatGatewayOneId}
+    NatGatewayTwoId: ${output gateways-${environment}::NatGatewayTwoId}
+    SubnetPrivateOneId: ${output subnets-${environment}::SubnetPrivateOneId}
+    SubnetPrivateTwoId: ${output subnets-${environment}::SubnetPrivateTwoId}
+    SubnetPublicOneId: ${output subnets-${environment}::SubnetPublicOneId}
+    SubnetPublicTwoId: ${output subnets-${environment}::SubnetPublicTwoId}
+    VpcId: ${output vpc-${environment}::VpcId}
+- enabled: true
+  name: roles-${environment}
+  template_path: ./roles/template.yaml
+  variables:
+    Namespace: ${namespace}-${environment}-${region}
+- enabled: true
+  name: security-groups-${environment}
+  template_path: ./security-groups/template.yaml
+  variables:
+    VpcId: ${output vpc-${environment}::VpcId}

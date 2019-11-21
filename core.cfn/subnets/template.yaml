@@ -1,0 +1,113 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Subnets Template
+Outputs:
+  SubnetPrivateOneId:
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-SubnetPrivateOneId
+    Value:
+      Ref: SubnetPrivateOne
+  SubnetPrivateTwoId:
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-SubnetPrivateTwoId
+    Value:
+      Ref: SubnetPrivateTwo
+  SubnetPublicOneId:
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-SubnetPublicOneId
+    Value:
+      Ref: SubnetPublicOne
+  SubnetPublicTwoId:
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-SubnetPublicTwoId
+    Value:
+      Ref: SubnetPublicTwo
+Parameters:
+  Namespace:
+    Description: Project namespace for tags.
+    Type: String
+  SubnetPrivateOneCidr:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    Description: Cidr range for the subnet.
+    Type: String
+  SubnetPrivateTwoCidr:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    Description: Cidr range for the subnet.
+    Type: String
+  SubnetPublicOneCidr:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    Description: Cidr range for the subnet.
+    Type: String
+  SubnetPublicTwoCidr:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    Description: Cidr range for the subnet.
+    Type: String
+  VpcId:
+    Description: VPC ID to add subnets to.
+    Type: String
+Resources:
+  SubnetPrivateOne:
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+        - "0"
+        - Fn::GetAZs: ""
+      CidrBlock:
+        Ref: SubnetPrivateOneCidr
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Sub: ${Namespace}-subnet-private-one
+      VpcId:
+        Ref: VpcId
+    Type: AWS::EC2::Subnet
+  SubnetPrivateTwo:
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+        - "1"
+        - Fn::GetAZs: ""
+      CidrBlock:
+        Ref: SubnetPrivateTwoCidr
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Sub: ${Namespace}-subnet-private-two
+      VpcId:
+        Ref: VpcId
+    Type: AWS::EC2::Subnet
+  SubnetPublicOne:
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+        - "0"
+        - Fn::GetAZs: ""
+      CidrBlock:
+        Ref: SubnetPublicOneCidr
+      MapPublicIpOnLaunch: true
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Sub: ${Namespace}-subnet-public-one
+      VpcId:
+        Ref: VpcId
+    Type: AWS::EC2::Subnet
+  SubnetPublicTwo:
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+        - "1"
+        - Fn::GetAZs: ""
+      CidrBlock:
+        Ref: SubnetPublicTwoCidr
+      MapPublicIpOnLaunch: true
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Sub: ${Namespace}-subnet-public-two
+      VpcId:
+        Ref: VpcId
+    Type: AWS::EC2::Subnet
