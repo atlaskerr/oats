@@ -1,12 +1,30 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: Security Groups Template
 Outputs:
+  SecurityGroupAsgId:
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-SecurityGroupAsgId
+    Value:
+      Ref: SecurityGroupAsg
   SecurityGroupBastionId:
     Export:
       Name:
         Fn::Sub: ${AWS::StackName}-SecurityGroupBastionId
     Value:
       Ref: SecurityGroupBastion
+  SecurityGroupEfsId:
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-SecurityGroupEfsId
+    Value:
+      Ref: SecurityGroupEfs
+  SecurityGroupElbId:
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-SecurityGroupElbId
+    Value:
+      Ref: SecurityGroupElb
   SecurityGroupPlaygroundId:
     Export:
       Name:
@@ -24,6 +42,15 @@ Parameters:
     Description: VPC ID to add security groups to.
     Type: String
 Resources:
+  SecurityGroupAsg:
+    Properties:
+      GroupDescription: Security group for auto scaling playground instances.
+      GroupName: asg
+      SecurityGroupEgress: []
+      SecurityGroupIngress: []
+      VpcId:
+        Ref: VpcId
+    Type: AWS::EC2::SecurityGroup
   SecurityGroupBastion:
     Properties:
       GroupDescription: Security group for SSH bastion instances.
@@ -45,6 +72,57 @@ Resources:
       VpcId:
         Ref: VpcId
     Type: AWS::EC2::SecurityGroup
+  SecurityGroupEfs:
+    Properties:
+      GroupDescription: Security group for EFS access.
+      GroupName: efs
+      SecurityGroupEgress: []
+      SecurityGroupIngress: []
+      VpcId:
+        Ref: VpcId
+    Type: AWS::EC2::SecurityGroup
+  SecurityGroupEgressAsgEfs:
+    Properties:
+      DestinationSecurityGroupId:
+        Fn::GetAtt:
+        - SecurityGroupEfs
+        - GroupId
+      FromPort: 2049
+      GroupId:
+        Fn::GetAtt:
+        - SecurityGroupAsg
+        - GroupId
+      IpProtocol: tcp
+      ToPort: 2049
+    Type: AWS::EC2::SecurityGroupEgress
+  SecurityGroupEgressAsgElb:
+    Properties:
+      DestinationSecurityGroupId:
+        Fn::GetAtt:
+        - SecurityGroupAsg
+        - GroupId
+      FromPort: 22
+      GroupId:
+        Fn::GetAtt:
+        - SecurityGroupElb
+        - GroupId
+      IpProtocol: tcp
+      ToPort: 22
+    Type: AWS::EC2::SecurityGroupEgress
+  SecurityGroupEgressBastionElb:
+    Properties:
+      DestinationSecurityGroupId:
+        Fn::GetAtt:
+        - SecurityGroupBastion
+        - GroupId
+      FromPort: 22
+      GroupId:
+        Fn::GetAtt:
+        - SecurityGroupElb
+        - GroupId
+      IpProtocol: tcp
+      ToPort: 22
+    Type: AWS::EC2::SecurityGroupEgress
   SecurityGroupEgressPlaygroundBastion:
     Properties:
       DestinationSecurityGroupId:
@@ -73,6 +151,57 @@ Resources:
       IpProtocol: tcp
       ToPort: 22
     Type: AWS::EC2::SecurityGroupEgress
+  SecurityGroupEgressVpnElb:
+    Properties:
+      DestinationSecurityGroupId:
+        Fn::GetAtt:
+        - SecurityGroupVpn
+        - GroupId
+      FromPort: 22
+      GroupId:
+        Fn::GetAtt:
+        - SecurityGroupElb
+        - GroupId
+      IpProtocol: tcp
+      ToPort: 22
+    Type: AWS::EC2::SecurityGroupEgress
+  SecurityGroupElb:
+    Properties:
+      GroupDescription: Security group for ELB access.
+      GroupName: elb
+      SecurityGroupEgress: []
+      SecurityGroupIngress: []
+      VpcId:
+        Ref: VpcId
+    Type: AWS::EC2::SecurityGroup
+  SecurityGroupIngressAsgEfs:
+    Properties:
+      FromPort: 2049
+      GroupId:
+        Fn::GetAtt:
+        - SecurityGroupEfs
+        - GroupId
+      IpProtocol: tcp
+      SourceSecurityGroupId:
+        Fn::GetAtt:
+        - SecurityGroupAsg
+        - GroupId
+      ToPort: 2049
+    Type: AWS::EC2::SecurityGroupIngress
+  SecurityGroupIngressBastionElb:
+    Properties:
+      FromPort: 22
+      GroupId:
+        Fn::GetAtt:
+        - SecurityGroupElb
+        - GroupId
+      IpProtocol: tcp
+      SourceSecurityGroupId:
+        Fn::GetAtt:
+        - SecurityGroupBastion
+        - GroupId
+      ToPort: 22
+    Type: AWS::EC2::SecurityGroupIngress
   SecurityGroupIngressBastionPlayground:
     Properties:
       FromPort: 22
@@ -84,6 +213,34 @@ Resources:
       SourceSecurityGroupId:
         Fn::GetAtt:
         - SecurityGroupBastion
+        - GroupId
+      ToPort: 22
+    Type: AWS::EC2::SecurityGroupIngress
+  SecurityGroupIngressElbAsg:
+    Properties:
+      FromPort: 22
+      GroupId:
+        Fn::GetAtt:
+        - SecurityGroupAsg
+        - GroupId
+      IpProtocol: tcp
+      SourceSecurityGroupId:
+        Fn::GetAtt:
+        - SecurityGroupElb
+        - GroupId
+      ToPort: 22
+    Type: AWS::EC2::SecurityGroupIngress
+  SecurityGroupIngressVpnElb:
+    Properties:
+      FromPort: 22
+      GroupId:
+        Fn::GetAtt:
+        - SecurityGroupElb
+        - GroupId
+      IpProtocol: tcp
+      SourceSecurityGroupId:
+        Fn::GetAtt:
+        - SecurityGroupVpn
         - GroupId
       ToPort: 22
     Type: AWS::EC2::SecurityGroupIngress

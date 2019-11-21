@@ -79,6 +79,9 @@ local securityGroups = {
     bastion:: '${output security-groups-${environment}::SecurityGroupBastionId}',
     vpn:: '${output security-groups-${environment}::SecurityGroupVpnId}',
     playground:: '${output security-groups-${environment}::SecurityGroupPlaygroundId}',
+    efs:: '${output security-groups-${environment}::SecurityGroupEfsId}',
+    asg:: '${output security-groups-${environment}::SecurityGroupAsgId}',
+    elb:: '${output security-groups-${environment}::SecurityGroupElbId}',
   },
 };
 

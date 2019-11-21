@@ -109,6 +109,39 @@ local vpn = {
   },
 };
 
+local asg = {
+  Type: 'AWS::EC2::SecurityGroup',
+  Properties: {
+    GroupDescription: 'Security group for auto scaling playground instances.',
+    GroupName: 'asg',
+    VpcId: { Ref: 'VpcId' },
+    SecurityGroupIngress: [],
+    SecurityGroupEgress: [],
+  },
+};
+
+local elb = {
+  Type: 'AWS::EC2::SecurityGroup',
+  Properties: {
+    GroupDescription: 'Security group for ELB access.',
+    GroupName: 'elb',
+    VpcId: { Ref: 'VpcId' },
+    SecurityGroupIngress: [],
+    SecurityGroupEgress: [],
+  },
+};
+
+local efs = {
+  Type: 'AWS::EC2::SecurityGroup',
+  Properties: {
+    GroupDescription: 'Security group for EFS access.',
+    GroupName: 'efs',
+    VpcId: { Ref: 'VpcId' },
+    SecurityGroupIngress: [],
+    SecurityGroupEgress: [],
+  },
+};
+
 {
   AWSTemplateFormatVersion: '2010-09-09',
   Description: 'Security Groups Template',
@@ -122,11 +155,17 @@ local vpn = {
     SecurityGroupBastion: bastion,
     SecurityGroupVpn: vpn,
     SecurityGroupPlayground: playground,
+    SecurityGroupAsg: asg,
+    SecurityGroupElb: elb,
+    SecurityGroupEfs: efs,
 
+    // Ingress rules
     SecurityGroupIngressBastionPlayground: {
       Type: 'AWS::EC2::SecurityGroupIngress',
       Properties: {
-        SourceSecurityGroupId: { 'Fn::GetAtt': ['SecurityGroupBastion', 'GroupId'] },
+        SourceSecurityGroupId: {
+          'Fn::GetAtt': ['SecurityGroupBastion', 'GroupId'],
+        },
         GroupId: { 'Fn::GetAtt': ['SecurityGroupPlayground', 'GroupId'] },
         FromPort: 22,
         ToPort: 22,
@@ -136,17 +175,74 @@ local vpn = {
     SecurityGroupIngressVpnPlayground: {
       Type: 'AWS::EC2::SecurityGroupIngress',
       Properties: {
-        SourceSecurityGroupId: { 'Fn::GetAtt': ['SecurityGroupVpn', 'GroupId'] },
+        SourceSecurityGroupId: {
+          'Fn::GetAtt': ['SecurityGroupVpn', 'GroupId'],
+        },
         GroupId: { 'Fn::GetAtt': ['SecurityGroupPlayground', 'GroupId'] },
         FromPort: 22,
         ToPort: 22,
         IpProtocol: 'tcp',
       },
     },
+    SecurityGroupIngressElbAsg: {
+      Type: 'AWS::EC2::SecurityGroupIngress',
+      Properties: {
+        SourceSecurityGroupId: {
+          'Fn::GetAtt': ['SecurityGroupElb', 'GroupId'],
+        },
+        GroupId: { 'Fn::GetAtt': ['SecurityGroupAsg', 'GroupId'] },
+        FromPort: 22,
+        ToPort: 22,
+        IpProtocol: 'tcp',
+      },
+    },
+
+    SecurityGroupIngressBastionElb: {
+      Type: 'AWS::EC2::SecurityGroupIngress',
+      Properties: {
+        SourceSecurityGroupId: {
+          'Fn::GetAtt': ['SecurityGroupBastion', 'GroupId'],
+        },
+        GroupId: { 'Fn::GetAtt': ['SecurityGroupElb', 'GroupId'] },
+        FromPort: 22,
+        ToPort: 22,
+        IpProtocol: 'tcp',
+      },
+    },
+
+    SecurityGroupIngressVpnElb: {
+      Type: 'AWS::EC2::SecurityGroupIngress',
+      Properties: {
+        SourceSecurityGroupId: {
+          'Fn::GetAtt': ['SecurityGroupVpn', 'GroupId'],
+        },
+        GroupId: { 'Fn::GetAtt': ['SecurityGroupElb', 'GroupId'] },
+        FromPort: 22,
+        ToPort: 22,
+        IpProtocol: 'tcp',
+      },
+    },
+
+    SecurityGroupIngressAsgEfs: {
+      Type: 'AWS::EC2::SecurityGroupIngress',
+      Properties: {
+        SourceSecurityGroupId: {
+          'Fn::GetAtt': ['SecurityGroupAsg', 'GroupId'],
+        },
+        GroupId: { 'Fn::GetAtt': ['SecurityGroupEfs', 'GroupId'] },
+        FromPort: 2049,
+        ToPort: 2049,
+        IpProtocol: 'tcp',
+      },
+    },
+
+    // Egress rules
     SecurityGroupEgressPlaygroundBastion: {
       Type: 'AWS::EC2::SecurityGroupEgress',
       Properties: {
-        DestinationSecurityGroupId: { 'Fn::GetAtt': ['SecurityGroupPlayground', 'GroupId'] },
+        DestinationSecurityGroupId: {
+          'Fn::GetAtt': ['SecurityGroupPlayground', 'GroupId'],
+        },
         GroupId: { 'Fn::GetAtt': ['SecurityGroupBastion', 'GroupId'] },
         FromPort: 22,
         ToPort: 22,
@@ -156,7 +252,9 @@ local vpn = {
     SecurityGroupEgressPlaygroundVpn: {
       Type: 'AWS::EC2::SecurityGroupEgress',
       Properties: {
-        DestinationSecurityGroupId: { 'Fn::GetAtt': ['SecurityGroupPlayground', 'GroupId'] },
+        DestinationSecurityGroupId: {
+          'Fn::GetAtt': ['SecurityGroupPlayground', 'GroupId'],
+        },
         GroupId: { 'Fn::GetAtt': ['SecurityGroupVpn', 'GroupId'] },
         FromPort: 22,
         ToPort: 22,
@@ -164,25 +262,101 @@ local vpn = {
       },
     },
 
+    SecurityGroupEgressAsgElb: {
+      Type: 'AWS::EC2::SecurityGroupEgress',
+      Properties: {
+        DestinationSecurityGroupId: {
+          'Fn::GetAtt': ['SecurityGroupAsg', 'GroupId'],
+        },
+        GroupId: { 'Fn::GetAtt': ['SecurityGroupElb', 'GroupId'] },
+        FromPort: 22,
+        ToPort: 22,
+        IpProtocol: 'tcp',
+      },
+    },
+
+    SecurityGroupEgressBastionElb: {
+      Type: 'AWS::EC2::SecurityGroupEgress',
+      Properties: {
+        DestinationSecurityGroupId: {
+          'Fn::GetAtt': ['SecurityGroupBastion', 'GroupId'],
+        },
+        GroupId: { 'Fn::GetAtt': ['SecurityGroupElb', 'GroupId'] },
+        FromPort: 22,
+        ToPort: 22,
+        IpProtocol: 'tcp',
+      },
+    },
+    SecurityGroupEgressVpnElb: {
+      Type: 'AWS::EC2::SecurityGroupEgress',
+      Properties: {
+        DestinationSecurityGroupId: {
+          'Fn::GetAtt': ['SecurityGroupVpn', 'GroupId'],
+        },
+        GroupId: { 'Fn::GetAtt': ['SecurityGroupElb', 'GroupId'] },
+        FromPort: 22,
+        ToPort: 22,
+        IpProtocol: 'tcp',
+      },
+    },
+    SecurityGroupEgressAsgEfs: {
+      Type: 'AWS::EC2::SecurityGroupEgress',
+      Properties: {
+        DestinationSecurityGroupId: {
+          'Fn::GetAtt': ['SecurityGroupEfs', 'GroupId'],
+        },
+        GroupId: { 'Fn::GetAtt': ['SecurityGroupAsg', 'GroupId'] },
+        FromPort: 2049,
+        ToPort: 2049,
+        IpProtocol: 'tcp',
+      },
+    },
+
   },
+
   Outputs: {
+
     SecurityGroupBastionId: {
       Value: { Ref: 'SecurityGroupBastion' },
       Export: {
         Name: { 'Fn::Sub': '${AWS::StackName}-SecurityGroupBastionId' },
       },
     },
+
     SecurityGroupVpnId: {
       Value: { Ref: 'SecurityGroupVpn' },
       Export: {
         Name: { 'Fn::Sub': '${AWS::StackName}-SecurityGroupVpnId' },
       },
     },
+
     SecurityGroupPlaygroundId: {
       Value: { Ref: 'SecurityGroupPlayground' },
       Export: {
         Name: { 'Fn::Sub': '${AWS::StackName}-SecurityGroupPlaygroundId' },
       },
     },
+
+    SecurityGroupAsgId: {
+      Value: { Ref: 'SecurityGroupAsg' },
+      Export: {
+        Name: { 'Fn::Sub': '${AWS::StackName}-SecurityGroupAsgId' },
+      },
+    },
+
+    SecurityGroupElbId: {
+      Value: { Ref: 'SecurityGroupElb' },
+      Export: {
+        Name: { 'Fn::Sub': '${AWS::StackName}-SecurityGroupElbId' },
+      },
+    },
+    SecurityGroupEfsId: {
+      Value: { Ref: 'SecurityGroupEfs' },
+      Export: {
+        Name: { 'Fn::Sub': '${AWS::StackName}-SecurityGroupEfsId' },
+      },
+    },
+
+
   },
 }
