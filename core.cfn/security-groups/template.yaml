@@ -1,18 +1,18 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: Security Groups Template
 Outputs:
-  SecurityGroupAllId:
-    Export:
-      Name:
-        Fn::Sub: ${AWS::StackName}-SecurityGroupAllId
-    Value:
-      Ref: SecurityGroupAll
   SecurityGroupBastionId:
     Export:
       Name:
         Fn::Sub: ${AWS::StackName}-SecurityGroupBastionId
     Value:
       Ref: SecurityGroupBastion
+  SecurityGroupPlaygroundId:
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-SecurityGroupPlaygroundId
+    Value:
+      Ref: SecurityGroupPlayground
   SecurityGroupVpnId:
     Export:
       Name:
@@ -24,22 +24,6 @@ Parameters:
     Description: VPC ID to add security groups to.
     Type: String
 Resources:
-  SecurityGroupAll:
-    Properties:
-      GroupDescription: Security group for instances accessed via bastion or vpn.
-      GroupName: all
-      SecurityGroupEgress:
-      - CidrIp: 0.0.0.0/0
-        FromPort: 80
-        IpProtocol: tcp
-        ToPort: 80
-      - CidrIp: 0.0.0.0/0
-        FromPort: 443
-        IpProtocol: tcp
-        ToPort: 443
-      VpcId:
-        Ref: VpcId
-    Type: AWS::EC2::SecurityGroup
   SecurityGroupBastion:
     Properties:
       GroupDescription: Security group for SSH bastion instances.
@@ -65,7 +49,7 @@ Resources:
     Properties:
       DestinationSecurityGroupId:
         Fn::GetAtt:
-        - SecurityGroupAll
+        - SecurityGroupPlayground
         - GroupId
       FromPort: 22
       GroupId:
@@ -79,7 +63,7 @@ Resources:
     Properties:
       DestinationSecurityGroupId:
         Fn::GetAtt:
-        - SecurityGroupAll
+        - SecurityGroupPlayground
         - GroupId
       FromPort: 22
       GroupId:
@@ -94,7 +78,7 @@ Resources:
       FromPort: 22
       GroupId:
         Fn::GetAtt:
-        - SecurityGroupAll
+        - SecurityGroupPlayground
         - GroupId
       IpProtocol: tcp
       SourceSecurityGroupId:
@@ -108,7 +92,7 @@ Resources:
       FromPort: 22
       GroupId:
         Fn::GetAtt:
-        - SecurityGroupAll
+        - SecurityGroupPlayground
         - GroupId
       IpProtocol: tcp
       SourceSecurityGroupId:
@@ -117,6 +101,22 @@ Resources:
         - GroupId
       ToPort: 22
     Type: AWS::EC2::SecurityGroupIngress
+  SecurityGroupPlayground:
+    Properties:
+      GroupDescription: Security group for instances accessed via bastion or vpn.
+      GroupName: all
+      SecurityGroupEgress:
+      - CidrIp: 0.0.0.0/0
+        FromPort: 80
+        IpProtocol: tcp
+        ToPort: 80
+      - CidrIp: 0.0.0.0/0
+        FromPort: 443
+        IpProtocol: tcp
+        ToPort: 443
+      VpcId:
+        Ref: VpcId
+    Type: AWS::EC2::SecurityGroup
   SecurityGroupVpn:
     Properties:
       GroupDescription: Security group for VPN instances.

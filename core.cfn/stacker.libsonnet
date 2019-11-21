@@ -78,7 +78,7 @@ local securityGroups = {
   outputs:: {
     bastion:: '${output security-groups-${environment}::SecurityGroupBastionId}',
     vpn:: '${output security-groups-${environment}::SecurityGroupVpnId}',
-    playground:: '${output security-groups-${environment}::SecurityGroupAllId}',
+    playground:: '${output security-groups-${environment}::SecurityGroupPlaygroundId}',
   },
 };
 

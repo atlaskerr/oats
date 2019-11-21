@@ -31,7 +31,7 @@ local bastion = {
   },
 };
 
-local all = {
+local playground = {
   Type: 'AWS::EC2::SecurityGroup',
   Properties: {
     GroupDescription: 'Security group for instances accessed via bastion or vpn.',
@@ -121,13 +121,13 @@ local vpn = {
   Resources: {
     SecurityGroupBastion: bastion,
     SecurityGroupVpn: vpn,
-    SecurityGroupAll: all,
+    SecurityGroupPlayground: playground,
 
     SecurityGroupIngressBastionPlayground: {
       Type: 'AWS::EC2::SecurityGroupIngress',
       Properties: {
         SourceSecurityGroupId: { 'Fn::GetAtt': ['SecurityGroupBastion', 'GroupId'] },
-        GroupId: { 'Fn::GetAtt': ['SecurityGroupAll', 'GroupId'] },
+        GroupId: { 'Fn::GetAtt': ['SecurityGroupPlayground', 'GroupId'] },
         FromPort: 22,
         ToPort: 22,
         IpProtocol: 'tcp',
@@ -137,7 +137,7 @@ local vpn = {
       Type: 'AWS::EC2::SecurityGroupIngress',
       Properties: {
         SourceSecurityGroupId: { 'Fn::GetAtt': ['SecurityGroupVpn', 'GroupId'] },
-        GroupId: { 'Fn::GetAtt': ['SecurityGroupAll', 'GroupId'] },
+        GroupId: { 'Fn::GetAtt': ['SecurityGroupPlayground', 'GroupId'] },
         FromPort: 22,
         ToPort: 22,
         IpProtocol: 'tcp',
@@ -146,7 +146,7 @@ local vpn = {
     SecurityGroupEgressPlaygroundBastion: {
       Type: 'AWS::EC2::SecurityGroupEgress',
       Properties: {
-        DestinationSecurityGroupId: { 'Fn::GetAtt': ['SecurityGroupAll', 'GroupId'] },
+        DestinationSecurityGroupId: { 'Fn::GetAtt': ['SecurityGroupPlayground', 'GroupId'] },
         GroupId: { 'Fn::GetAtt': ['SecurityGroupBastion', 'GroupId'] },
         FromPort: 22,
         ToPort: 22,
@@ -156,7 +156,7 @@ local vpn = {
     SecurityGroupEgressPlaygroundVpn: {
       Type: 'AWS::EC2::SecurityGroupEgress',
       Properties: {
-        DestinationSecurityGroupId: { 'Fn::GetAtt': ['SecurityGroupAll', 'GroupId'] },
+        DestinationSecurityGroupId: { 'Fn::GetAtt': ['SecurityGroupPlayground', 'GroupId'] },
         GroupId: { 'Fn::GetAtt': ['SecurityGroupVpn', 'GroupId'] },
         FromPort: 22,
         ToPort: 22,
@@ -178,10 +178,10 @@ local vpn = {
         Name: { 'Fn::Sub': '${AWS::StackName}-SecurityGroupVpnId' },
       },
     },
-    SecurityGroupAllId: {
-      Value: { Ref: 'SecurityGroupAll' },
+    SecurityGroupPlaygroundId: {
+      Value: { Ref: 'SecurityGroupPlayground' },
       Export: {
-        Name: { 'Fn::Sub': '${AWS::StackName}-SecurityGroupAllId' },
+        Name: { 'Fn::Sub': '${AWS::StackName}-SecurityGroupPlaygroundId' },
       },
     },
   },
