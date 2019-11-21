@@ -1,0 +1,31 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: VPN Instance Template
+Parameters:
+  SecurityGroupId:
+    Type: String
+  SubnetId:
+    Type: String
+Resources:
+  EIP:
+    Properties:
+      Domain: vpc
+    Type: AWS::EC2::EIP
+  EIPAssociation:
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - EIP
+        - AllocationId
+      InstanceId:
+        Ref: Instance
+    Type: AWS::EC2::EIPAssociation
+  Instance:
+    Properties:
+      ImageId: ami-0ff8a91507f77f867
+      InstanceType: t3.micro
+      KeyName: akerr-lab-key
+      SecurityGroupIds:
+      - Ref: SecurityGroupId
+      SubnetId:
+        Ref: SubnetId
+    Type: AWS::EC2::Instance

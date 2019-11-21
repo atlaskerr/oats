@@ -50,3 +50,21 @@ stacks:
   template_path: ./security-groups/template.yaml
   variables:
     VpcId: ${output vpc-${environment}::VpcId}
+- enabled: true
+  name: svc-bastion-${environment}
+  template_path: ./services/bastion/template.yaml
+  variables:
+    SecurityGroupId: ${output security-groups-${environment}::SecurityGroupBastionId}
+    SubnetId: ${output subnets-${environment}::SubnetPublicOneId}
+- enabled: true
+  name: svc-vpn-${environment}
+  template_path: ./services/vpn/template.yaml
+  variables:
+    SecurityGroupId: ${output security-groups-${environment}::SecurityGroupVpnId}
+    SubnetId: ${output subnets-${environment}::SubnetPublicTwoId}
+- enabled: true
+  name: svc-playground-${environment}
+  template_path: ./services/playground/template.yaml
+  variables:
+    SecurityGroupId: ${output security-groups-${environment}::SecurityGroupAllId}
+    SubnetId: ${output subnets-${environment}::SubnetPrivateOneId}

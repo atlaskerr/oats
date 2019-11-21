@@ -1,0 +1,33 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Bastion Instance Template
+Parameters:
+  SecurityGroupId:
+    Description: Security group to attach to instance.
+    Type: String
+  SubnetId:
+    Description: ID of the subnet to place the instance in.
+    Type: String
+Resources:
+  EIP:
+    Properties:
+      Domain: vpc
+    Type: AWS::EC2::EIP
+  EIPAssociation:
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - EIP
+        - AllocationId
+      InstanceId:
+        Ref: Instance
+    Type: AWS::EC2::EIPAssociation
+  Instance:
+    Properties:
+      ImageId: ami-0ff8a91507f77f867
+      InstanceType: t3.micro
+      KeyName: akerr-lab-key
+      SecurityGroupIds:
+      - Ref: SecurityGroupId
+      SubnetId:
+        Ref: SubnetId
+    Type: AWS::EC2::Instance

@@ -75,7 +75,11 @@ local securityGroups = {
       VpcId: vpc.outputs.id,
     },
   },
-  outputs:: {},
+  outputs:: {
+    bastion:: '${output security-groups-${environment}::SecurityGroupBastionId}',
+    vpn:: '${output security-groups-${environment}::SecurityGroupVpnId}',
+    playground:: '${output security-groups-${environment}::SecurityGroupAllId}',
+  },
 };
 
 local routes = {
@@ -98,6 +102,48 @@ local routes = {
   outputs:: {},
 };
 
+local bastion = {
+  stack:: {
+    name: 'svc-bastion-${environment}',
+    template_path: './services/bastion/template.yaml',
+    enabled: true,
+    variables: {
+      SecurityGroupId: securityGroups.outputs.bastion,
+      SubnetId: subnets.outputs.publicOneId,
+    },
+  },
+  outputs: {
+  },
+};
+
+local vpn = {
+  stack:: {
+    name: 'svc-vpn-${environment}',
+    template_path: './services/vpn/template.yaml',
+    enabled: true,
+    variables: {
+      SecurityGroupId: securityGroups.outputs.vpn,
+      SubnetId: subnets.outputs.publicTwoId,
+    },
+  },
+  outputs: {
+  },
+};
+
+local playground = {
+  stack:: {
+    name: 'svc-playground-${environment}',
+    template_path: './services/playground/template.yaml',
+    enabled: true,
+    variables: {
+      SecurityGroupId: securityGroups.outputs.playground,
+      SubnetId: subnets.outputs.privateOneId,
+    },
+  },
+  outputs: {
+  },
+};
+
 {
   namespace: '${namespace}',
   environment: '${environment}',
@@ -110,5 +156,8 @@ local routes = {
     routes.stack,
     roles.stack,
     securityGroups.stack,
+    bastion.stack,
+    vpn.stack,
+    playground.stack,
   ],
 }
