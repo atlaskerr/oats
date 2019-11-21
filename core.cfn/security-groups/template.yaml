@@ -37,17 +37,6 @@ Resources:
         FromPort: 443
         IpProtocol: tcp
         ToPort: 443
-      SecurityGroupIngress:
-      - FromPort: 0
-        IpProtocol: "-1"
-        SourceSecurityGroupId:
-          Ref: SecurityGroupVpn
-        ToPort: 0
-      - FromPort: 0
-        IpProtocol: "-1"
-        SourceSecurityGroupId:
-          Ref: SecurityGroupBastion
-        ToPort: 0
       VpcId:
         Ref: VpcId
     Type: AWS::EC2::SecurityGroup
@@ -56,10 +45,6 @@ Resources:
       GroupDescription: Security group for SSH bastion instances.
       GroupName: bastion
       SecurityGroupEgress:
-      - CidrIp: 10.55.0.0/16
-        FromPort: 0
-        IpProtocol: "-1"
-        ToPort: 0
       - CidrIp: 0.0.0.0/0
         FromPort: 80
         IpProtocol: tcp
@@ -76,6 +61,62 @@ Resources:
       VpcId:
         Ref: VpcId
     Type: AWS::EC2::SecurityGroup
+  SecurityGroupEgressPlaygroundBastion:
+    Properties:
+      DestinationSecurityGroupId:
+        Fn::GetAtt:
+        - SecurityGroupAll
+        - GroupId
+      FromPort: 22
+      GroupId:
+        Fn::GetAtt:
+        - SecurityGroupBastion
+        - GroupId
+      IpProtocol: tcp
+      ToPort: 22
+    Type: AWS::EC2::SecurityGroupEgress
+  SecurityGroupEgressPlaygroundVpn:
+    Properties:
+      DestinationSecurityGroupId:
+        Fn::GetAtt:
+        - SecurityGroupAll
+        - GroupId
+      FromPort: 22
+      GroupId:
+        Fn::GetAtt:
+        - SecurityGroupVpn
+        - GroupId
+      IpProtocol: tcp
+      ToPort: 22
+    Type: AWS::EC2::SecurityGroupEgress
+  SecurityGroupIngressBastionPlayground:
+    Properties:
+      FromPort: 22
+      GroupId:
+        Fn::GetAtt:
+        - SecurityGroupAll
+        - GroupId
+      IpProtocol: tcp
+      SourceSecurityGroupId:
+        Fn::GetAtt:
+        - SecurityGroupBastion
+        - GroupId
+      ToPort: 22
+    Type: AWS::EC2::SecurityGroupIngress
+  SecurityGroupIngressVpnPlayground:
+    Properties:
+      FromPort: 22
+      GroupId:
+        Fn::GetAtt:
+        - SecurityGroupAll
+        - GroupId
+      IpProtocol: tcp
+      SourceSecurityGroupId:
+        Fn::GetAtt:
+        - SecurityGroupVpn
+        - GroupId
+      ToPort: 22
+    Type: AWS::EC2::SecurityGroupIngress
   SecurityGroupVpn:
     Properties:
       GroupDescription: Security group for VPN instances.
