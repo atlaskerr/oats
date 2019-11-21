@@ -149,7 +149,24 @@ local playground = {
       DnsName: '${playground_dns_name}',
     },
   },
-  outputs: {
+  outputs: {},
+};
+
+local efs = {
+  stack:: {
+    name: 'efs-${environment}',
+    template_path: './storage/efs/template.yaml',
+    enabled: true,
+    variables: {
+      Namespace: '${namespace}-${environment}-${region}',
+      PlaygroundSubnetId: playground.stack.variables.SubnetId,
+      PlaygroundFileSystemSecurityGroupId: securityGroups.outputs.efs,
+      PlaygroundFileSystemDnsName: '${playground_efs_dns_name}',
+      ZoneId: '${zone_id}',
+    },
+  },
+  outputs:: {
+    playgroundDnsName:: '${output efs-${environment}::PlaygroundFileSystemDnsName}',
   },
 };
 
@@ -168,5 +185,6 @@ local playground = {
     bastion.stack,
     vpn.stack,
     playground.stack,
+    efs.stack,
   ],
 }

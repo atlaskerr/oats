@@ -74,3 +74,12 @@ stacks:
     SecurityGroupId: ${output security-groups-${environment}::SecurityGroupPlaygroundId}
     SubnetId: ${output subnets-${environment}::SubnetPrivateOneId}
     ZoneId: ${zone_id}
+- enabled: true
+  name: efs-${environment}
+  template_path: ./storage/efs/template.yaml
+  variables:
+    Namespace: ${namespace}-${environment}-${region}
+    PlaygroundFileSystemDnsName: ${playground_efs_dns_name}
+    PlaygroundFileSystemSecurityGroupId: ${output security-groups-${environment}::SecurityGroupEfsId}
+    PlaygroundSubnetId: ${output subnets-${environment}::SubnetPrivateOneId}
+    ZoneId: ${zone_id}

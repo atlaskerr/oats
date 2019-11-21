@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: EFS Storage Template
+Outputs:
+  PlaygroundFileSystemDnsName:
+    Description: ID of the Playground EFS.
+    Value:
+      Ref: DnsRecord
+Parameters:
+  Namespace:
+    Description: Project namespace for tags.
+    Type: String
+  PlaygroundFileSystemDnsName:
+    Description: FQDN to use for the efs volume
+    Type: String
+  PlaygroundFileSystemSecurityGroupId:
+    Description: ID of the subnet to add Playground EFS volume.
+    Type: String
+  PlaygroundSubnetId:
+    Description: ID of the subnet to add Playground EFS volume.
+    Type: String
+  ZoneId:
+    Description: Route53 zone to add the service DNS records to.
+    Type: String
+Resources:
+  DnsRecord:
+    Properties:
+      HostedZoneId:
+        Ref: ZoneId
+      Name:
+        Ref: PlaygroundFileSystemDnsName
+      ResourceRecords:
+      - Fn::GetAtt:
+        - PlaygroundFileSystemMountTarget
+        - IpAddress
+      TTL: "300"
+      Type: A
+    Type: AWS::Route53::RecordSet
+  PlaygroundFileSystem:
+    Properties:
+      FileSystemTags:
+      - Key: Name
+        Value:
+          Fn::Sub: ${Namespace}-efs-playground
+      PerformanceMode: generalPurpose
+    Type: AWS::EFS::FileSystem
+  PlaygroundFileSystemMountTarget:
+    Properties:
+      FileSystemId:
+        Ref: PlaygroundFileSystem
+      SecurityGroups:
+      - Ref: PlaygroundFileSystemSecurityGroupId
+      SubnetId:
+        Ref: PlaygroundSubnetId
+    Type: AWS::EFS::MountTarget
