@@ -54,17 +54,23 @@ stacks:
   name: svc-bastion-${environment}
   template_path: ./services/bastion/template.yaml
   variables:
+    DnsName: ${bastion_dns_name}
     SecurityGroupId: ${output security-groups-${environment}::SecurityGroupBastionId}
     SubnetId: ${output subnets-${environment}::SubnetPublicOneId}
+    ZoneId: ${zone_id}
 - enabled: true
   name: svc-vpn-${environment}
   template_path: ./services/vpn/template.yaml
   variables:
+    DnsName: ${vpn_dns_name}
     SecurityGroupId: ${output security-groups-${environment}::SecurityGroupVpnId}
     SubnetId: ${output subnets-${environment}::SubnetPublicTwoId}
+    ZoneId: ${zone_id}
 - enabled: true
   name: svc-playground-${environment}
   template_path: ./services/playground/template.yaml
   variables:
+    DnsName: ${playground_dns_name}
     SecurityGroupId: ${output security-groups-${environment}::SecurityGroupAllId}
     SubnetId: ${output subnets-${environment}::SubnetPrivateOneId}
+    ZoneId: ${zone_id}

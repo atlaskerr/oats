@@ -110,6 +110,8 @@ local bastion = {
     variables: {
       SecurityGroupId: securityGroups.outputs.bastion,
       SubnetId: subnets.outputs.publicOneId,
+      ZoneId: '${zone_id}',
+      DnsName: '${bastion_dns_name}',
     },
   },
   outputs: {
@@ -124,6 +126,8 @@ local vpn = {
     variables: {
       SecurityGroupId: securityGroups.outputs.vpn,
       SubnetId: subnets.outputs.publicTwoId,
+      ZoneId: '${zone_id}',
+      DnsName: '${vpn_dns_name}',
     },
   },
   outputs: {
@@ -138,6 +142,8 @@ local playground = {
     variables: {
       SecurityGroupId: securityGroups.outputs.playground,
       SubnetId: subnets.outputs.privateOneId,
+      ZoneId: '${zone_id}',
+      DnsName: '${playground_dns_name}',
     },
   },
   outputs: {

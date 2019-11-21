@@ -1,13 +1,30 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: Bastion Instance Template
 Parameters:
+  DnsName:
+    Description: FQDN to use for the service
+    Type: String
   SecurityGroupId:
     Description: Security group to attach to instance.
     Type: String
   SubnetId:
     Description: ID of the subnet to place the instance in.
     Type: String
+  ZoneId:
+    Description: Route53 zone to add the service DNS records to.
+    Type: String
 Resources:
+  DnsRecord:
+    Properties:
+      HostedZoneId:
+        Ref: ZoneId
+      Name:
+        Ref: DnsName
+      ResourceRecords:
+      - Ref: EIP
+      TTL: "300"
+      Type: A
+    Type: AWS::Route53::RecordSet
   EIP:
     Properties:
       Domain: vpc

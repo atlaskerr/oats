@@ -1,11 +1,28 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: VPN Instance Template
 Parameters:
+  DnsName:
+    Description: FQDN to use for the service
+    Type: String
   SecurityGroupId:
     Type: String
   SubnetId:
     Type: String
+  ZoneId:
+    Description: Route53 zone to add the service DNS records to.
+    Type: String
 Resources:
+  DnsRecord:
+    Properties:
+      HostedZoneId:
+        Ref: ZoneId
+      Name:
+        Ref: DnsName
+      ResourceRecords:
+      - Ref: EIP
+      TTL: "300"
+      Type: A
+    Type: AWS::Route53::RecordSet
   EIP:
     Properties:
       Domain: vpc
