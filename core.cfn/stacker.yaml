@@ -74,6 +74,7 @@ stacks:
   variables:
     DnsName: ${playground_dns_name}
     ElbSecurityGroupId: ${output security-groups-${environment}::SecurityGroupElbId}
+    Namespace: ${namespace}-${environment}-${region}
     PlaygroundSecurityGroupId: ${output security-groups-${environment}::SecurityGroupAsgId}
     SubnetId: ${output subnets-${environment}::SubnetPrivateOneId}
     ZoneId: ${zone_id}

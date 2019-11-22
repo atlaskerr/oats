@@ -7,6 +7,9 @@ Parameters:
   ElbSecurityGroupId:
     Description: Security group to attach to instance.
     Type: String
+  Namespace:
+    Description: A unique name to associate with resources for tagging purposes.
+    Type: String
   PlaygroundSecurityGroupId:
     Description: Security group to attach to instance.
     Type: String
@@ -19,12 +22,19 @@ Parameters:
 Resources:
   AutoScalingGroup:
     Properties:
+      AutoScalingGroupName:
+        Fn::Sub: ${Namespace}-asg-playground
       LaunchConfigurationName:
         Ref: LaunchConfiguration
       LoadBalancerNames:
       - Ref: LoadBalancer
       MaxSize: "1"
       MinSize: "1"
+      Tags:
+      - Key: Name
+        PropagateAtLaunch: true
+        Value:
+          Fn::Sub: ${Namespace}-asg-playground
       VPCZoneIdentifier:
       - Ref: SubnetId
     Type: AWS::AutoScaling::AutoScalingGroup

@@ -144,6 +144,7 @@ local playground = {
     template_path: './services/playground/template.yaml',
     enabled: true,
     variables: {
+      Namespace: '${namespace}-${environment}-${region}',
       PlaygroundSecurityGroupId: securityGroups.outputs.asg,
       ElbSecurityGroupId: securityGroups.outputs.elb,
       SubnetId: subnets.outputs.privateOneId,

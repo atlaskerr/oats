@@ -5,6 +5,11 @@ local amazonLinux = 'ami-0ff8a91507f77f867';
   Description: 'Internal Instance Template',
   Parameters: {
 
+    Namespace: {
+      Description: 'A unique name to associate with resources for tagging purposes.',
+      Type: 'String',
+    },
+
     PlaygroundSecurityGroupId: {
       Description: 'Security group to attach to instance.',
       Type: 'String',
@@ -56,11 +61,17 @@ local amazonLinux = 'ami-0ff8a91507f77f867';
     AutoScalingGroup: {
       Type: 'AWS::AutoScaling::AutoScalingGroup',
       Properties: {
+        AutoScalingGroupName: { 'Fn::Sub': '${Namespace}-asg-playground' },
         LaunchConfigurationName: { Ref: 'LaunchConfiguration' },
         LoadBalancerNames: [{ Ref: 'LoadBalancer' }],
         VPCZoneIdentifier: [{ Ref: 'SubnetId' }],
         MinSize: '1',
         MaxSize: '1',
+        Tags: [{
+          Key: 'Name',
+          Value: { 'Fn::Sub': '${Namespace}-asg-playground' },
+          PropagateAtLaunch: true,
+        }],
       },
     },
 
