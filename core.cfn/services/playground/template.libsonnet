@@ -31,31 +31,43 @@ local amazonLinux = 'ami-0ff8a91507f77f867';
   },
 
   Resources: {
-    Instance: {
-      Type: 'AWS::EC2::Instance',
-      Properties: {
-        InstanceType: 't3.micro',
-        ImageId: amazonLinux,
-        KeyName: 'akerr-lab-key',
-        SubnetId: { Ref: 'SubnetId' },
-        SecurityGroupIds: [{ Ref: 'PlaygroundSecurityGroupId' }],
-      },
-    },
-
     DnsRecord: {
       Type: 'AWS::Route53::RecordSet',
       Properties: {
         HostedZoneId: { Ref: 'ZoneId' },
         Name: { Ref: 'DnsName' },
         TTL: '300',
-        Type: 'A',
-        ResourceRecords: [{ 'Fn::GetAtt': ['Instance', 'PrivateIp'] }],
+        Type: 'CNAME',
+        ResourceRecords: [{ 'Fn::GetAtt': ['LoadBalancer', 'DNSName'] }],
+      },
+    },
+
+    LaunchConfiguration: {
+      Type: 'AWS::AutoScaling::LaunchConfiguration',
+      Properties: {
+        ImageId: amazonLinux,
+        KeyName: 'akerr-lab-key',
+        InstanceType: 't3.micro',
+        SecurityGroups: [{ Ref: 'PlaygroundSecurityGroupId' }],
+        UserData: '',
+      },
+    },
+
+    AutoScalingGroup: {
+      Type: 'AWS::AutoScaling::AutoScalingGroup',
+      Properties: {
+        LaunchConfigurationName: { Ref: 'LaunchConfiguration' },
+        LoadBalancerNames: [{ Ref: 'LoadBalancer' }],
+        VPCZoneIdentifier: [{ Ref: 'SubnetId' }],
+        MinSize: '1',
+        MaxSize: '1',
       },
     },
 
     LoadBalancer: {
       Type: 'AWS::ElasticLoadBalancing::LoadBalancer',
       Properties: {
+        Scheme: 'internal',
         Subnets: [{ Ref: 'SubnetId' }],
         SecurityGroups: [{ Ref: 'ElbSecurityGroupId' }],
         Listeners: [{

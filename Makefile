@@ -12,5 +12,5 @@ clean:
 	scripts/clean.sh
 
 .PHONY: validate
-validate:
+validate: generate
 	scripts/validate.sh

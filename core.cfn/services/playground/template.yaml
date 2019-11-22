@@ -17,6 +17,17 @@ Parameters:
     Description: Route53 zone to add the service DNS records to.
     Type: String
 Resources:
+  AutoScalingGroup:
+    Properties:
+      LaunchConfigurationName:
+        Ref: LaunchConfiguration
+      LoadBalancerNames:
+      - Ref: LoadBalancer
+      MaxSize: "1"
+      MinSize: "1"
+      VPCZoneIdentifier:
+      - Ref: SubnetId
+    Type: AWS::AutoScaling::AutoScalingGroup
   DnsRecord:
     Properties:
       HostedZoneId:
@@ -25,21 +36,20 @@ Resources:
         Ref: DnsName
       ResourceRecords:
       - Fn::GetAtt:
-        - Instance
-        - PrivateIp
+        - LoadBalancer
+        - DNSName
       TTL: "300"
-      Type: A
+      Type: CNAME
     Type: AWS::Route53::RecordSet
-  Instance:
+  LaunchConfiguration:
     Properties:
       ImageId: ami-0ff8a91507f77f867
       InstanceType: t3.micro
       KeyName: akerr-lab-key
-      SecurityGroupIds:
+      SecurityGroups:
       - Ref: PlaygroundSecurityGroupId
-      SubnetId:
-        Ref: SubnetId
-    Type: AWS::EC2::Instance
+      UserData: ""
+    Type: AWS::AutoScaling::LaunchConfiguration
   LoadBalancer:
     Properties:
       HealthCheck:
@@ -53,6 +63,7 @@ Resources:
         InstanceProtocol: TCP
         LoadBalancerPort: "22"
         Protocol: TCP
+      Scheme: internal
       SecurityGroups:
       - Ref: ElbSecurityGroupId
       Subnets:

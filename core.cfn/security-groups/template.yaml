@@ -113,12 +113,26 @@ Resources:
     Properties:
       DestinationSecurityGroupId:
         Fn::GetAtt:
-        - SecurityGroupBastion
+        - SecurityGroupElb
         - GroupId
       FromPort: 22
       GroupId:
         Fn::GetAtt:
+        - SecurityGroupBastion
+        - GroupId
+      IpProtocol: tcp
+      ToPort: 22
+    Type: AWS::EC2::SecurityGroupEgress
+  SecurityGroupEgressElbAsg:
+    Properties:
+      DestinationSecurityGroupId:
+        Fn::GetAtt:
         - SecurityGroupElb
+        - GroupId
+      FromPort: 22
+      GroupId:
+        Fn::GetAtt:
+        - SecurityGroupAsg
         - GroupId
       IpProtocol: tcp
       ToPort: 22
@@ -155,12 +169,12 @@ Resources:
     Properties:
       DestinationSecurityGroupId:
         Fn::GetAtt:
-        - SecurityGroupVpn
+        - SecurityGroupElb
         - GroupId
       FromPort: 22
       GroupId:
         Fn::GetAtt:
-        - SecurityGroupElb
+        - SecurityGroupVpn
         - GroupId
       IpProtocol: tcp
       ToPort: 22

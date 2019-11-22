@@ -140,10 +140,11 @@ local vpn = {
 local playground = {
   stack:: {
     name: 'svc-playground-${environment}',
+    requires: ['gateways-${environment}'],
     template_path: './services/playground/template.yaml',
     enabled: true,
     variables: {
-      PlaygroundSecurityGroupId: securityGroups.outputs.playground,
+      PlaygroundSecurityGroupId: securityGroups.outputs.asg,
       ElbSecurityGroupId: securityGroups.outputs.elb,
       SubnetId: subnets.outputs.privateOneId,
       ZoneId: '${zone_id}',

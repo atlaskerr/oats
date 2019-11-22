@@ -274,14 +274,26 @@ local efs = {
         IpProtocol: 'tcp',
       },
     },
+    SecurityGroupEgressElbAsg: {
+      Type: 'AWS::EC2::SecurityGroupEgress',
+      Properties: {
+        DestinationSecurityGroupId: {
+          'Fn::GetAtt': ['SecurityGroupElb', 'GroupId'],
+        },
+        GroupId: { 'Fn::GetAtt': ['SecurityGroupAsg', 'GroupId'] },
+        FromPort: 22,
+        ToPort: 22,
+        IpProtocol: 'tcp',
+      },
+    },
 
     SecurityGroupEgressBastionElb: {
       Type: 'AWS::EC2::SecurityGroupEgress',
       Properties: {
         DestinationSecurityGroupId: {
-          'Fn::GetAtt': ['SecurityGroupBastion', 'GroupId'],
+          'Fn::GetAtt': ['SecurityGroupElb', 'GroupId'],
         },
-        GroupId: { 'Fn::GetAtt': ['SecurityGroupElb', 'GroupId'] },
+        GroupId: { 'Fn::GetAtt': ['SecurityGroupBastion', 'GroupId'] },
         FromPort: 22,
         ToPort: 22,
         IpProtocol: 'tcp',
@@ -291,9 +303,9 @@ local efs = {
       Type: 'AWS::EC2::SecurityGroupEgress',
       Properties: {
         DestinationSecurityGroupId: {
-          'Fn::GetAtt': ['SecurityGroupVpn', 'GroupId'],
+          'Fn::GetAtt': ['SecurityGroupElb', 'GroupId'],
         },
-        GroupId: { 'Fn::GetAtt': ['SecurityGroupElb', 'GroupId'] },
+        GroupId: { 'Fn::GetAtt': ['SecurityGroupVpn', 'GroupId'] },
         FromPort: 22,
         ToPort: 22,
         IpProtocol: 'tcp',
