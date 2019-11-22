@@ -71,7 +71,8 @@ stacks:
   template_path: ./services/playground/template.yaml
   variables:
     DnsName: ${playground_dns_name}
-    SecurityGroupId: ${output security-groups-${environment}::SecurityGroupPlaygroundId}
+    ElbSecurityGroupId: ${output security-groups-${environment}::SecurityGroupElbId}
+    PlaygroundSecurityGroupId: ${output security-groups-${environment}::SecurityGroupPlaygroundId}
     SubnetId: ${output subnets-${environment}::SubnetPrivateOneId}
     ZoneId: ${zone_id}
 - enabled: true

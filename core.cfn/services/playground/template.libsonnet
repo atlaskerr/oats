@@ -5,7 +5,11 @@ local amazonLinux = 'ami-0ff8a91507f77f867';
   Description: 'Internal Instance Template',
   Parameters: {
 
-    SecurityGroupId: {
+    PlaygroundSecurityGroupId: {
+      Description: 'Security group to attach to instance.',
+      Type: 'String',
+    },
+    ElbSecurityGroupId: {
       Description: 'Security group to attach to instance.',
       Type: 'String',
     },
@@ -25,6 +29,7 @@ local amazonLinux = 'ami-0ff8a91507f77f867';
       Type: 'String',
     },
   },
+
   Resources: {
     Instance: {
       Type: 'AWS::EC2::Instance',
@@ -33,7 +38,7 @@ local amazonLinux = 'ami-0ff8a91507f77f867';
         ImageId: amazonLinux,
         KeyName: 'akerr-lab-key',
         SubnetId: { Ref: 'SubnetId' },
-        SecurityGroupIds: [{ Ref: 'SecurityGroupId' }],
+        SecurityGroupIds: [{ Ref: 'PlaygroundSecurityGroupId' }],
       },
     },
 
@@ -45,6 +50,27 @@ local amazonLinux = 'ami-0ff8a91507f77f867';
         TTL: '300',
         Type: 'A',
         ResourceRecords: [{ 'Fn::GetAtt': ['Instance', 'PrivateIp'] }],
+      },
+    },
+
+    LoadBalancer: {
+      Type: 'AWS::ElasticLoadBalancing::LoadBalancer',
+      Properties: {
+        Subnets: [{ Ref: 'SubnetId' }],
+        SecurityGroups: [{ Ref: 'ElbSecurityGroupId' }],
+        Listeners: [{
+          LoadBalancerPort: '22',
+          Protocol: 'TCP',
+          InstancePort: '22',
+          InstanceProtocol: 'TCP',
+        }],
+        HealthCheck: {
+          HealthyThreshold: '2',
+          Interval: '15',
+          Target: 'TCP:22',
+          Timeout: '10',
+          UnhealthyThreshold: '2',
+        },
       },
     },
 

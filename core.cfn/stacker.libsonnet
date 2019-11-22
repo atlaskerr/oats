@@ -143,7 +143,8 @@ local playground = {
     template_path: './services/playground/template.yaml',
     enabled: true,
     variables: {
-      SecurityGroupId: securityGroups.outputs.playground,
+      PlaygroundSecurityGroupId: securityGroups.outputs.playground,
+      ElbSecurityGroupId: securityGroups.outputs.elb,
       SubnetId: subnets.outputs.privateOneId,
       ZoneId: '${zone_id}',
       DnsName: '${playground_dns_name}',

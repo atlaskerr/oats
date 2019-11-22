@@ -4,7 +4,10 @@ Parameters:
   DnsName:
     Description: FQDN to use for the service
     Type: String
-  SecurityGroupId:
+  ElbSecurityGroupId:
+    Description: Security group to attach to instance.
+    Type: String
+  PlaygroundSecurityGroupId:
     Description: Security group to attach to instance.
     Type: String
   SubnetId:
@@ -33,7 +36,25 @@ Resources:
       InstanceType: t3.micro
       KeyName: akerr-lab-key
       SecurityGroupIds:
-      - Ref: SecurityGroupId
+      - Ref: PlaygroundSecurityGroupId
       SubnetId:
         Ref: SubnetId
     Type: AWS::EC2::Instance
+  LoadBalancer:
+    Properties:
+      HealthCheck:
+        HealthyThreshold: "2"
+        Interval: "15"
+        Target: TCP:22
+        Timeout: "10"
+        UnhealthyThreshold: "2"
+      Listeners:
+      - InstancePort: "22"
+        InstanceProtocol: TCP
+        LoadBalancerPort: "22"
+        Protocol: TCP
+      SecurityGroups:
+      - Ref: ElbSecurityGroupId
+      Subnets:
+      - Ref: SubnetId
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
