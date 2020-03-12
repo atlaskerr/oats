@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Gateways Template
+Description: ""
 Outputs:
   InternetGatewayId:
     Description: Internet Gateway ID.

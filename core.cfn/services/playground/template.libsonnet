@@ -54,7 +54,11 @@ local amazonLinux = 'ami-0ff8a91507f77f867';
         KeyName: 'akerr-lab-key',
         InstanceType: 't3.micro',
         SecurityGroups: [{ Ref: 'PlaygroundSecurityGroupId' }],
-        UserData: '',
+        UserData: {
+          'Fn::Base64': {
+            'Fn::Sub': [],
+          },
+        },
       },
     },
 

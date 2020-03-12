@@ -58,7 +58,9 @@ Resources:
       KeyName: akerr-lab-key
       SecurityGroups:
       - Ref: PlaygroundSecurityGroupId
-      UserData: ""
+      UserData:
+        Fn::Base64:
+          Fn::Sub: []
     Type: AWS::AutoScaling::LaunchConfiguration
   LoadBalancer:
     Properties:
